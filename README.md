@@ -19,6 +19,7 @@ HF_MODEL_DIR = "/path/to/save/hf/model"
 # noise scheduler you want to set as default
 scheduler_type = "PNDM"  # K-LMS / DDIM / EulerAncestral / K-LMS
 
+# use the corresponding sd config file that your model is fine-tuned based on
 config_file = "./inference_config/v1-5-inference.yaml"
 
 extract_ema = False
