@@ -1,0 +1,5 @@
+torch
+OmegaConf
+safetensors
+diffusers==0.12.0
+transformers==4.24.0
