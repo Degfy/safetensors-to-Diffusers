@@ -16,6 +16,7 @@
 # limitations under the License.
 """ Conversion script for the Stable Diffusion checkpoints. """
 
+import os
 import torch
 from omegaconf import OmegaConf
 from diffusers.pipelines.latent_diffusion.pipeline_latent_diffusion import (
@@ -1003,12 +1004,17 @@ def convert_full_checkpoint(
         extract_ema,
         output_path=None,
         vae_pt_path=None,
+        with_control_net=False,
 
 ):
-    checkpoint = {}
-    with safe_open(checkpoint_path, framework="pt", device=0) as f:
-        for k in f.keys():
-            checkpoint[k] = f.get_tensor(k)
+    if checkpoint_path.endswith(".ckpt"):
+        checkpoint = torch.load(checkpoint_path, weights_only=False)
+        checkpoint = checkpoint["state_dict"]
+    else:
+        checkpoint = {}
+        with safe_open(checkpoint_path, framework="pt", device=0) as f:
+            for k in f.keys():
+                checkpoint[k] = f.get_tensor(k)
 
     if vae_pt_path:
         vae_checkpoint = torch.load(vae_pt_path, weights_only=False)
@@ -1019,6 +1025,21 @@ def convert_full_checkpoint(
                 checkpoint[new_key] = value
 
     original_config = OmegaConf.load(config_file)
+
+    # Convert the ControlNetModel model.
+    if with_control_net:
+        # Convert the UNet2DConditionModel model.
+        unet_config = create_unet_diffusers_config(original_config)
+        converted_unet_checkpoint = convert_ldm_controlnet_checkpoint(
+            checkpoint, unet_config
+        )
+
+        control_net = ControlNetModel(**unet_config)
+        control_net.load_state_dict(converted_unet_checkpoint)
+        del converted_unet_checkpoint
+        control_net_path = os.path.join(output_path, "controlnet")
+        control_net.save_pretrained(control_net_path)
+
     num_train_timesteps = original_config.model.params.timesteps
     beta_start = original_config.model.params.linear_start
     beta_end = original_config.model.params.linear_end
