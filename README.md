@@ -11,7 +11,8 @@ $ pip install -r requirements.txt
 from utils import convert_full_checkpoint
 
 safe_tensor_path = "/path/to/your-safe-tensor-model"
-# replace None with the path to your vae.pt file if you want to use customized vae weights instead of those saved in safetensors
+
+# replace None with the path to your vae.pt file you like
 vae_pt_path = None
 
 HF_MODEL_DIR = "/path/to/save/hf/model"
@@ -35,4 +36,5 @@ convert_full_checkpoint(
 )
 ```
 
-If your model contains a ControNet, such as [these checkpoints](https://huggingface.co/lllyasviel/ControlNet/tree/main/models), set ``with_control_net=True`` to save a ControNet parameters 
+## Notes
+If your checkpoint contains a ControlNet, such as [these checkpoints](https://huggingface.co/lllyasviel/ControlNet/tree/main/models), set ``with_control_net=True`` to seperate ControlNet parameters from the checkpoint.  ControlNet can be regarded as a variant of UNet2DConditionModel, therefore, most codes for converting UNet2DConditionModel can be reused.  
