@@ -31,5 +31,8 @@ convert_full_checkpoint(
     extract_ema=extract_ema,
     output_path=HF_MODEL_DIR,
     vae_pt_path=vae_pt_path,
+    with_control_net=False
 )
 ```
+
+If your model contains a ControNet, such as [these checkpoints](https://huggingface.co/lllyasviel/ControlNet/tree/main/models), set ``with_control_net=True`` to save a ControNet parameters 

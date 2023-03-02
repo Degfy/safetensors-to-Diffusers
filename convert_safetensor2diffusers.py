@@ -32,4 +32,5 @@ if __name__ == '__main__':
         extract_ema=extract_ema,
         output_path=HF_MODEL_DIR,
         vae_pt_path=vae_pt_path,
+        with_control_net=False
     )
