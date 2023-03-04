@@ -23,7 +23,7 @@ from diffusers.pipelines.latent_diffusion.pipeline_latent_diffusion import (
     LDMBertConfig, LDMBertModel)
 
 from safetensors import safe_open
-from diffusers import (AutoencoderKL, DDIMScheduler,
+from diffusers import (AutoencoderKL, DDIMScheduler, ControlNetModel,
                        EulerAncestralDiscreteScheduler, EulerDiscreteScheduler,
                        LMSDiscreteScheduler, PNDMScheduler,
                        StableDiffusionPipeline, UNet2DConditionModel)
@@ -750,7 +750,7 @@ def convert_ldm_controlnet_checkpoint(checkpoint, config):
     Takes a state dict and a config, and returns a converted checkpoint.
     """
 
-    # extract state_dict for UNet
+    # extract state_dict for UNet/ControlNet
     unet_state_dict = {}
     keys = list(checkpoint.keys())
 
@@ -775,8 +775,6 @@ def convert_ldm_controlnet_checkpoint(checkpoint, config):
         "time_embed.2.bias"
     ]
 
-    new_checkpoint["conv_in.weight"] = unet_state_dict["input_blocks.0.0.weight"]
-    new_checkpoint["conv_in.bias"] = unet_state_dict["input_blocks.0.0.bias"]
 
     # Retrieves the keys for the input blocks only
     num_input_blocks = len(
@@ -965,6 +963,9 @@ def convert_ldm_controlnet_checkpoint(checkpoint, config):
 
                 new_checkpoint[new_path] = unet_state_dict[old_path]
 
+    new_checkpoint["conv_in.weight"] = unet_state_dict["input_blocks.0.0.weight"]
+    new_checkpoint["conv_in.bias"] = unet_state_dict["input_blocks.0.0.bias"]
+
     num_cond_embedding = len(
         {
             ".".join(layer.split(".")[:2])
@@ -974,8 +975,13 @@ def convert_ldm_controlnet_checkpoint(checkpoint, config):
     )
     for i in range(num_cond_embedding):
         for content in ['weight', 'bias']:
+            if i == 0:
+                new_name = 'controlnet_cond_embedding.conv_in.{}'.format(content)
+            elif i == num_cond_embedding - 1:
+                new_name = 'controlnet_cond_embedding.conv_out.{}'.format(content)
+            else:
+                new_name = 'controlnet_cond_embedding.blocks.{}.{}'.format(i - 1, content)
             old_name = "input_hint_block.{}.{}".format(i * 2, content)
-            new_name = 'controlnet_cond_embedding.conditioning_embedder.{}.{}'.format(i * 2, content)
             new_checkpoint[new_name] = unet_state_dict[old_name]
 
     # Retrieves the keys for the output blocks only
