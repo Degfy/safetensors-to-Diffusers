@@ -3,7 +3,7 @@
 This repo is for converting a CompVis checkpoint in safetensor format into files for [Diffusers](https://huggingface.co/docs/diffusers/index), edited from [diffuser space](https://huggingface.co/spaces/diffusers/convert-sd-ckpt)
 
 ## News
-Mar 4th, 2023; supports ControlNet implemented by diffusers; The script can seperate ControlNet parameters from the checkpoint if your checkpoint contains a ControlNet, such as [these checkpoints](https://huggingface.co/lllyasviel/ControlNet/tree/main/models). Just set ``with_control_net=True``
+**Mar 4th, 2023**: supports ControlNet implemented by diffusers; The script can seperate ControlNet parameters from the checkpoint if your checkpoint contains a ControlNet, such as [these checkpoints](https://huggingface.co/lllyasviel/ControlNet/tree/main/models). Just set ``with_control_net=True``.
 
 ## Install
 ```shell
@@ -39,4 +39,3 @@ convert_full_checkpoint(
 )
 ```
 
-## Notes
